@@ -1,0 +1,8 @@
+venv/
+env/
+npm-debug.log
+node_modules/
+.serverless
+.requirements
+.idea
+*.pyc

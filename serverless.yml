@@ -1,0 +1,36 @@
+service: data-processor
+
+provider:
+  name: aws
+  runtime: python2.7
+  region: eu-west-1
+
+iamRoleStatements:
+    -  Effect: "Allow"
+       Action:
+         - "kinesis:DescribeStream"
+         - "kinesis:ListStreams"
+         - "kinesis:GetShardIterator"
+         - "kinesis:GetRecords"
+         - "kinesis:ListTagsForStream"
+       Resource: "*"
+    -  Effect: "Allow"
+       Action:
+          - "s3:PutObject"
+          - "s3:GetObject"
+          - "s3:DeleteObject"
+          - "s3:PutObjectAcl"
+       Resource: "*"
+
+functions:
+  data-processor:
+    handler: handler.handle
+    events:
+      - stream:
+          arn: arn:aws:kinesis:eu-west-1:495434586566:stream/user-data
+          batchSize: 400
+          startingPosition: TRIM_HORIZON
+
+plugins:
+  - serverless-python-requirements
+

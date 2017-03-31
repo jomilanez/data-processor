@@ -1,0 +1,11 @@
+{
+  "name": "data-processor",
+  "private": true,
+  "devDependencies": {
+    "serverless": "^1.5.1",
+    "serverless-python-requirements": "^1.2.0"
+  },
+  "scripts": {
+    "serverless": "serverless"
+  }
+}
