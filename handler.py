@@ -4,6 +4,7 @@ import logging
 import base64
 import os
 import sys
+import time
 
 logger = logging.getLogger()
 logger.setLevel(logging.WARN)
@@ -12,6 +13,14 @@ here = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(here, "./.requirements"))
 
 from aws_kinesis_agg.deaggregator import deaggregate_records
+from datadog import initialize, api
+
+options = {
+    'api_key': '5590e1ccc09e95eb8be59d73b9b808de',
+    'app_key': '4077817914fe339015139cbb1a65b2ff8e972369'
+}
+initialize(**options)
+
 
 client = boto3.client('s3')
 
@@ -23,6 +32,8 @@ def save(parsed_data, key, bucket_name):
     client.put_object(Bucket=bucket_name, Key=key, Body=parsed_data)
 
 def handle(event, context):
+    parsed_successful = 0
+    parsed_failed = 0
     for record in deaggregate_records(event['Records']):
         payload = base64.b64decode(record['kinesis']['data'])
         try:
@@ -31,7 +42,12 @@ def handle(event, context):
             if parsed_data['eventType'] in RECOMMENDATION_DATA:
                 save(payload, key, 'bucket-josiane1')
             save(payload, key, 'bucket-josiane2')
+            parsed_successful += 1
         except Exception:
             logging.exception('message')
+            parsed_failed += 1
+    send_metrics('parsed.successfull', parsed_successful)
+    send_metrics('parsed.failed', parsed_failed)
 
-
+def send_metrics(metric_name, number):
+    api.Metric.send(metric=metric_name, points=(time.time(), number))

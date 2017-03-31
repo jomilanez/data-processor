@@ -1,1 +1,2 @@
 aws-kinesis-agg==1.0.1
+datadog
