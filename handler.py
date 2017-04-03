@@ -21,6 +21,9 @@ options = {
 }
 initialize(**options)
 
+bucket_1 = os.environ['BUCKET_1']
+bucket_2 = os.environ['BUCKET_2']
+environment = os.environ['ENVIRONMENT']
 
 client = boto3.client('s3')
 
@@ -40,8 +43,8 @@ def handle(event, context):
             parsed_data = json.loads(payload)
             key = "%s.json" % parsed_data['eventId']
             if parsed_data['eventType'] in RECOMMENDATION_DATA:
-                save(payload, key, 'bucket-josiane1')
-            save(payload, key, 'bucket-josiane2')
+                save(payload, key, bucket_1)
+            save(payload, key, bucket_2)
             parsed_successful += 1
         except Exception:
             logging.exception('message')
@@ -50,4 +53,4 @@ def handle(event, context):
     send_metrics('parsed.failed', parsed_failed)
 
 def send_metrics(metric_name, number):
-    api.Metric.send(metric=metric_name, points=(time.time(), number))
+    api.Metric.send(metric=metric_name, points=(time.time(), number), tags=['environment:%s' % environment])

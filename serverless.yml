@@ -4,6 +4,10 @@ provider:
   name: aws
   runtime: python2.7
   region: eu-west-1
+  environment:
+    ENVIRONMENT: ${env:ENVIRONMENT}
+    BUCKET_1: ${env:BUCKET_1}
+    BOCKET_2: ${env:BUCKET_2}
 
 iamRoleStatements:
     -  Effect: "Allow"
@@ -27,7 +31,7 @@ functions:
     handler: handler.handle
     events:
       - stream:
-          arn: arn:aws:kinesis:eu-west-1:495434586566:stream/user-data
+          arn: ${env:KINESIS}
           batchSize: 400
           startingPosition: TRIM_HORIZON
 
